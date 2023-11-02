@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "prepare-compress"
+version = "0.1.0"
+description = "Compress files into archive"
+authors = ["Martijn Bonajo <m.bonajo@fontys.nl>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
