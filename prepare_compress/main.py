@@ -9,7 +9,7 @@ from prepare_compress.zip import create_zip
 def compress() -> None:
     try:
         inputs = get_input("inputs", required=True)
-        excluded = get_input("excluded", required=True)
+        excluded = get_input("excluded")
         output = get_input("output", required=True)
         working_directory = get_input("working-directory")
         recursive = get_input("recursive")
