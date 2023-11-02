@@ -1,6 +1,6 @@
-id: "move"
-name: "Move"
-description: "Move files"
+id: "compress"
+name: "Compress files"
+description: "Compress files into an archive"
 inputs:
   inputs:
     description: "Glob(s) to files/directories to compress"
@@ -20,6 +20,7 @@ inputs:
     required: false
   allow-outside-working-directory:
     description: "Allow the glob(s) to match outside the working directory (outside means up the working tree)"
+    type: boolean
     required: false
     default: false
   recursive:
