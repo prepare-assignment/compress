@@ -31,6 +31,10 @@ recursive:
   description: "Recursively match files in directories"
   type: boolean
   default: true
+include-hidden:
+  description: "Also match hidden files and directories (starting with a '.') with wildcards such as '*' and '**', for both inputs and excluded"
+  type: boolean
+  default: false
 ```
 
 ## Outputs

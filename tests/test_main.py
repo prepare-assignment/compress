@@ -46,7 +46,7 @@ def set_inputs(monkeypatch: MonkeyPatch, **inputs: Any) -> None:
     Pass the inputs like prepare-assignment core does: as JSON in PREPARE_<NAME> environment variables,
     including the defaults of task.yml. Use the names from task.yml, with '_' for '-'.
     """
-    values = {"allow-outside-working-directory": False, "recursive": True}
+    values = {"allow-outside-working-directory": False, "recursive": True, "include-hidden": False}
     values.update({key.replace("_", "-"): value for key, value in inputs.items()})
     for key, value in values.items():
         if value is not None:
@@ -150,3 +150,34 @@ def test_working_directory_unchanged_after_error(tmp_path: Path, monkeypatch: Mo
     with pytest.raises(FileNotFoundError):
         create_zip("archive.zip", ["a.txt", "missing.txt"], "in")
     assert Path(os.getcwd()) == tmp_path
+
+
+@pytest.fixture
+def hidden_project(tmp_path: Path, monkeypatch: MonkeyPatch) -> Path:
+    for path in [".gitignore", "README.md", "src/A.java", "src/.hidden", ".git/config"]:
+        (tmp_path / path).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / path).write_text("x")
+    (tmp_path / "out").mkdir()
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+def _zipped(output: str) -> List[str]:
+    with zipfile.ZipFile(output) as archive:
+        return sorted(archive.namelist())
+
+
+def test_hidden_files_not_included_by_default(hidden_project: Path, mocker: MockerFixture,
+                                               monkeypatch: MonkeyPatch) -> None:
+    set_inputs(monkeypatch, inputs=["**/*"], excluded=["out/**", "out"], output="out/archive.zip")
+    mocker.patch("prepare_compress.main.set_output")
+    compress()
+    assert _zipped("out/archive.zip") == ["README.md", "src/", "src/A.java"]
+
+
+def test_include_hidden(hidden_project: Path, mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
+    set_inputs(monkeypatch, inputs=["**/*"], excluded=["out/**", "out", ".git", ".git/**"], output="out/archive.zip",
+               include_hidden=True)
+    mocker.patch("prepare_compress.main.set_output")
+    compress()
+    assert _zipped("out/archive.zip") == [".gitignore", "README.md", "src/", "src/.hidden", "src/A.java"]
