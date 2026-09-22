@@ -14,8 +14,10 @@ def compress() -> None:
         working_directory = get_input("working-directory")
         recursive = get_input("recursive")
         allow_outside = get_input("allow-outside-working-directory")
+        include_hidden = get_input("include-hidden")
         files = get_matching_files(inputs, excluded, relative_to=working_directory,
-                                   allow_outside_working_dir=allow_outside, recursive=recursive)
+                                   allow_outside_working_dir=allow_outside, recursive=recursive,
+                                   include_hidden=bool(include_hidden))
         create_zip(output, files, working_directory)
         set_output("files", files)
     except Exception as e:
