@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from typing import List, Optional
-from zipfile import ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile
 
 
 def create_zip(output: str, files: List[str], working_directory: Optional[str] = None) -> None:
@@ -18,7 +18,7 @@ def create_zip(output: str, files: List[str], working_directory: Optional[str] =
     if extension is None or extension != ".zip":
         raise ValueError(f"Output '{output}' doesn't have 'zip' extension")
     old_cwd = os.getcwd()
-    with ZipFile(Path(output), 'w') as handle:
+    with ZipFile(Path(output), 'w', compression=ZIP_DEFLATED) as handle:
         if working_directory:
             os.chdir(working_directory)
         for f in files:
