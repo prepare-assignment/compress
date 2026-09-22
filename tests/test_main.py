@@ -9,6 +9,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from pytest_mock import MockerFixture
 
 from prepare_compress.main import compress
+from prepare_compress.zip import create_zip
 
 
 def setup_temp(path: str) -> None:
@@ -125,3 +126,27 @@ def test_archive_is_compressed(tmp_path: Path, mocker: MockerFixture, monkeypatc
         assert info.compress_type == zipfile.ZIP_DEFLATED
         assert info.compress_size < info.file_size // 10
         assert archive.read("big.txt") == b"x" * 100_000
+
+
+def test_file_before_1980(tmp_path: Path, mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
+    """Zip can't store dates before 1980, which failed the task (e.g. files from reproducible builds)"""
+    (tmp_path / "old.txt").write_text("old")
+    os.utime(tmp_path / "old.txt", (86400, 86400))  # 2 January 1970
+    set_inputs(monkeypatch, inputs=["old.txt"], output="archive.zip")
+    failed = mocker.patch("prepare_compress.main.set_failed")
+    mocker.patch("prepare_compress.main.set_output")
+    monkeypatch.chdir(tmp_path)
+    compress()
+    failed.assert_not_called()
+    with zipfile.ZipFile("archive.zip") as archive:
+        assert archive.getinfo("old.txt").date_time == (1980, 1, 1, 0, 0, 0)
+        assert archive.read("old.txt") == b"old"
+
+
+def test_working_directory_unchanged_after_error(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    """create_zip changed the working directory and didn't change it back when writing failed"""
+    setup_temp(str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(FileNotFoundError):
+        create_zip("archive.zip", ["a.txt", "missing.txt"], "in")
+    assert Path(os.getcwd()) == tmp_path
