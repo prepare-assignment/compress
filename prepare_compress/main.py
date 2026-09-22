@@ -13,7 +13,7 @@ def compress() -> None:
         output = get_input("output", required=True)
         working_directory = get_input("working-directory")
         recursive = get_input("recursive")
-        allow_outside = get_input("allow_outside_working_directory")
+        allow_outside = get_input("allow-outside-working-directory")
         files = get_matching_files(inputs, excluded, relative_to=working_directory,
                                    allow_outside_working_dir=allow_outside, recursive=recursive)
         create_zip(output, files, working_directory)
