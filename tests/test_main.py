@@ -111,3 +111,17 @@ def test_outside_working_directory_allowed(tmp_path: Path, mocker: MockerFixture
     failed.assert_not_called()
     spy.assert_called_once_with("files", [(tmp_path / "outside.txt").as_posix()])
     assert os.path.isfile("archive.zip")
+
+
+def test_archive_is_compressed(tmp_path: Path, mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
+    """The files were stored without compression (ZIP_STORED)"""
+    (tmp_path / "big.txt").write_text("x" * 100_000)
+    set_inputs(monkeypatch, inputs=["big.txt"], output="archive.zip")
+    mocker.patch("prepare_compress.main.set_output")
+    monkeypatch.chdir(tmp_path)
+    compress()
+    with zipfile.ZipFile("archive.zip") as archive:
+        info = archive.getinfo("big.txt")
+        assert info.compress_type == zipfile.ZIP_DEFLATED
+        assert info.compress_size < info.file_size // 10
+        assert archive.read("big.txt") == b"x" * 100_000
