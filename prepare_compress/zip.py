@@ -17,10 +17,10 @@ def create_zip(output: str, files: List[str], working_directory: Optional[str] =
     name, extension = os.path.splitext(file)
     if extension is None or extension != ".zip":
         raise ValueError(f"Output '{output}' doesn't have 'zip' extension")
-    old_cwd = os.getcwd()
-    with ZipFile(Path(output), 'w', compression=ZIP_DEFLATED) as handle:
-        if working_directory:
-            os.chdir(working_directory)
+    base = working_directory or ""
+    # strict_timestamps=False: files from before 1980 (which zip can't store) get the date 1980-01-01
+    with ZipFile(Path(output), 'w', compression=ZIP_DEFLATED, strict_timestamps=False) as handle:
         for f in files:
-            handle.write(f)
-    os.chdir(old_cwd)
+            # Read the file relative to the working directory, store it under the matched name. This doesn't
+            # change the current directory, which wasn't restored if writing failed.
+            handle.write(os.path.join(base, f), arcname=f)
