@@ -43,3 +43,16 @@ files:
   type: array
   items: string
 ```
+
+## Releases
+
+Releases are automated with [semantic-release](https://semantic-release.gitbook.io/). Pull requests are squash merged, so the PR title becomes the commit on `main` and must follow [Conventional Commits](https://www.conventionalcommits.org/) (checked on every PR):
+
+| PR title | Release |
+|----------|---------|
+| `fix: ...`, `perf: ...` | patch (1.2.3 → 1.2.4) |
+| `feat: ...` | minor (1.2.3 → 1.3.0) |
+| `!` after the type (e.g. `feat!: ...`, `refactor!: ...`) or a `BREAKING CHANGE:` footer | major (1.2.3 → 2.0.0) |
+| `docs:`, `chore:`, `ci:`, `build:`, `refactor:`, `test:`, `style:`, `revert:` | no release |
+
+On every merge to `main` the next version is determined, tagged (`vX.Y.Z`) and a GitHub release is created. The major tag (e.g. `v1`) is moved to the new release, so `uses: compress@v1` always gets the newest 1.x version.
