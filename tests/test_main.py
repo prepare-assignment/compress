@@ -43,8 +43,8 @@ def setup_temp(path: str) -> None:
     "inputs,output,working_directory,expected",
     [
         (["a.txt", "test.txt"], "archive.zip", None, ["a.txt", "test.txt"]),
-        (["**/*.txt"], "archive.zip", "in", ["a.txt", "b.txt", str(Path("nested/c.txt"))]),
-        (["**/*.txt"], "out/archive.zip", "in", ["a.txt", "b.txt", str(Path("nested/c.txt"))]),
+        (["**/*.txt"], "archive.zip", "in", ["a.txt", "b.txt", "nested/c.txt"]),
+        (["**/*.txt"], "out/archive.zip", "in", ["a.txt", "b.txt", "nested/c.txt"]),
     ]
 )
 def test_move_success(inputs: List[str],
